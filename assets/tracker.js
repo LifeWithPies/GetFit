@@ -190,4 +190,44 @@
     dayName       : function (n) { return DAY_NAMES[n] || ''; },
     daySub        : function (n) { return DAY_SUBS[n]  || ''; }
   };
+
+  // ── PWA: inject manifest + meta tags + register service worker ───────────
+  (function () {
+    if (!document.querySelector('link[rel="manifest"]')) {
+      var lnk = document.createElement('link');
+      lnk.rel = 'manifest';
+      lnk.href = '../manifest.json';
+      document.head.appendChild(lnk);
+    }
+
+    var metas = [
+      { name: 'theme-color',                       content: '#22c55e' },
+      { name: 'apple-mobile-web-app-capable',      content: 'yes' },
+      { name: 'apple-mobile-web-app-status-bar-style', content: 'black-translucent' },
+      { name: 'apple-mobile-web-app-title',        content: 'GetFit' }
+    ];
+    metas.forEach(function (m) {
+      if (!document.querySelector('meta[name="' + m.name + '"]')) {
+        var el = document.createElement('meta');
+        el.name = m.name; el.content = m.content;
+        document.head.appendChild(el);
+      }
+    });
+
+    if (!document.querySelector('link[rel="apple-touch-icon"]')) {
+      var ai = document.createElement('link');
+      ai.rel = 'apple-touch-icon';
+      ai.href = '../assets/icon-512.svg';
+      document.head.appendChild(ai);
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('../sw.js').catch(function (err) {
+          console.warn('[GetFit] SW registration failed:', err);
+        });
+      });
+    }
+  }());
+
 }());
